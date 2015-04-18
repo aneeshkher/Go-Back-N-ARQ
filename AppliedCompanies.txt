@@ -38,14 +38,14 @@
 38. Texas Instruments - SE Intern
 39. Intone Networks. - Applied by sending LinkedIn message. - REJECT
 40. Lexmark - SE Student (summer)
-41. Alcatel Lucent - Wireless Software Dev Env (summer intern), SE Intern
+41. Alcatel Lucent - Wireless Software Dev Env (summer intern), SE Intern - REJECT
 42. Spirent - SE Intern, 
 43. Avaya - SE Intern
 44. Expedia - Network Engineer Intern - Interview REJECT
 45. Symantec - SE Intern 23103BR - REJECT
 46. Western Digital - 2015 HDD Summer Internship. - REJECT
 47. Motorola - SE Summer Internship
-48. A10 Networks - SE Automation
+48. A10 Networks - SE Automation - REJECT
 49. Brocade - SDE Intern
 50. Wealth Front - SE Intern - REJECT
 51. Autodesk - Software Development Intern
@@ -139,3 +139,5 @@
 139. Nuance - Application Development Intern
 140. Microchip - Intern
 141. Dedicated Computing - Network intern
+142. AOL - Associate SDET Intern
+143. Canary - Software Test Automation Intern
