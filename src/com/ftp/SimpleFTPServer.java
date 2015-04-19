@@ -21,9 +21,9 @@ public class SimpleFTPServer {
 					+ " <port_no> <file_name> <probability>");
 			System.exit(1);
 		}
-		String fileName = args[0];
-		double probability = Double.parseDouble(args[1]);
-		int listenPort = Integer.parseInt(args[2]);
+		String fileName = args[1];
+		double probability = Double.parseDouble(args[2]);
+		int listenPort = Integer.parseInt(args[0]);
 		byte[] process = new byte[8192];
 
 		DatagramSocket udpServerSocket;
@@ -33,16 +33,20 @@ public class SimpleFTPServer {
 				receivedBytes.length);
 		int sequenceNumber = 0;
 		int firstTime = 1;
-		udpServerSocket = new DatagramSocket(listenPort);
+		
+		udpServerSocket = new DatagramSocket(listenPort,InetAddress.getLocalHost());
 
 		while (true) {
 			double r = Math.random();
 			udpServerSocket.receive(receivedPacket);
 			if (r <= probability) {
+				System.out.println("Packet Loss due to probability " 
+						+ probability);
 				continue;
 			} else if (!computeChecksum()) {
 				udpServerSocket.receive(receivedPacket);
 			} else {
+				System.out.println("Receiving packet");
 				int dataLength = receivedPacket.getLength();
 				process = receivedPacket.getData();
 				int replyPort = receivedPacket.getPort();
