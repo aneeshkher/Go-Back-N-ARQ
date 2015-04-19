@@ -11,7 +11,6 @@ public class FileOperations {
 
 	public void openAndReadFile (String fileName) throws IOException {
 		ArrayList<String> lines = new ArrayList<>();
-		ArrayList<Byte> byteLines = new ArrayList<>();
 		String line;
 		File file = new File(fileName);
 		Long fLength;
@@ -20,11 +19,11 @@ public class FileOperations {
 		FileInputStream f1 = new FileInputStream(file);
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(file));
-			BufferedReader copy = new BufferedReader(new FileReader(file));
-			int fileLength = getFileLength(copy);
-			copy.close();
+			//BufferedReader copy = new BufferedReader(new FileReader(file));
+			//int fileLength = getFileLength(copy);
+			//copy.close();
 			byte[] bytes = new byte[fLength.intValue()];
-			System.out.println("Length of file: " + fileLength );
+			//System.out.println("Length of file: " + fileLength );
 			while ((line = reader.readLine()) != null) {
 				//byte[] temp = line.getBytes();
 				lines.add(line);
