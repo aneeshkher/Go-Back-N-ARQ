@@ -41,6 +41,9 @@ public class SimpleFTPServer {
 			double r = Math.random();
 			System.out.println("Before receiving");
 			udpServerSocket.receive(receivedPacket);
+			String filePacket = new String(receivedPacket.getData());
+			System.out.println("Received packet from client: ");
+			System.out.println(filePacket);
 			if (r <= probability) {
 				System.out.println("Packet Loss due to probability " 
 						+ probability);
@@ -51,31 +54,24 @@ public class SimpleFTPServer {
 				System.out.println("Receiving packet");
 				//int dataLength = receivedPacket.getLength();
 				//process = receivedPacket.getData();
-				int byteIter = 0;
-				for (byte b : receivedPacket.getData()) {
-					process[byteIter] = b;
-					byteIter++;
-				}
-				int dataLength = process.length;
-				System.out.println("Process array is: " + new String(process));
+				
+				int dataLength = filePacket.length();
 				int replyPort = receivedPacket.getPort();
 				InetAddress replyAddress = receivedPacket.getAddress();
-				System.out.println("process array length: " + process.length);
-				byte[] seqNumberByte = new byte[32];
-				for (int i = 0; i < 16; i++) {
-					System.out.println(new String(process).charAt(i));
-				}
+				String seqNumberString = "";
 				for (int i = 32; i < 64; i++) {
-					seqNumberByte[32 - i] = process[i];
+					seqNumberString.concat(Character.toString(filePacket.charAt(i)));
 				}
 				//String seqNumberString = seqNumberByte.toString();
-				String seqNumberString = new String(seqNumberByte);
+				seqNumberString = seqNumberString.substring(1);
 				int seqNumberInt = Integer.parseInt(seqNumberString, 2);
 				if (seqNumberInt == sequenceNumber) {
-					byte[] dataBytes = new byte[dataLength - 64];
+					//byte[] dataBytes = new byte[dataLength - 64];
+					String dataString = "";
 					for (int i = 64; i < dataLength; i++) {
-						dataBytes[i] = process[i];
+						dataString.concat(Character.toString(filePacket.charAt(i)));
 					}
+					byte[] dataBytes = dataString.getBytes();
 					file.write(dataBytes);
 					int ackNumber = seqNumberInt + dataBytes.length;
 					String sendString = "10101010101010100000000000000000";

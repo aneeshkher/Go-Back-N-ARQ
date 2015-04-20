@@ -12,6 +12,8 @@ public class ByteOperations {
 	    int original = Integer.parseInt(binary, 2);
 	    System.out.println("Integer value of binary '" + binary + "' is " + original + ".");
 		
+	    String test = "01000000000000000000000010000000";
+	    System.out.println("Integer representation: " + Integer.parseInt(test, 2));
 		int sequence = 500;
 		String messageData = "This is some data ";
 		String seqString = Integer.toString(sequence);
@@ -23,11 +25,11 @@ public class ByteOperations {
 		System.out.println("Decoded is: " + decoded);
 		for (int i = 0; i < messageBytes.length; i++) {
 			String s = new String(new byte[]{messageBytes[i]});
-			System.out.print(s);
+			//System.out.print(s);
 		}
 		int length = messageBytes.length;
 		for  (int i = 0; i < length; i++) {
-			System.out.println(messageBytes[i]);
+			//System.out.println(messageBytes[i]);
 		}
 	}
 
