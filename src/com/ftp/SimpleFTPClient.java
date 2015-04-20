@@ -9,6 +9,10 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class SimpleFTPClient {
 
@@ -18,6 +22,7 @@ public class SimpleFTPClient {
 	static int sentNotAcked = 0;
 	static int MSS;
 	static HashMap<Integer, String> unackData = new HashMap<>();
+	static Queue<String> timedOutPackets = new LinkedList<String>();
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
 		System.out.println(args.length);
@@ -42,6 +47,7 @@ public class SimpleFTPClient {
 		FileInputStream fileStream = new FileInputStream(file);
 		int changingWindow = windowSize;
 		int sequenceNumber = 0;
+		HashMap<Integer, Long> expectedReceiveTime = new HashMap<>();
 		
 		int maxSend = windowSize;
 		
@@ -63,6 +69,14 @@ public class SimpleFTPClient {
 				byte[] sendBytes = sendDataPacket.getBytes();
 				DatagramPacket sendPacket = new DatagramPacket(sendBytes, sendBytes.length, IPAddress, serverPort);
 				udpClientSocket.send(sendPacket);
+				PacketTimer p1 = new PacketTimer(sequenceNumber, (long)1000);
+				Timer t1 = new Timer();
+				t1.schedule(p1, (long)1000);
+				if (sequenceNumber == 0) {
+					expectedReceiveTime.put(sequenceNumber, (long)1000);
+				} else {
+					
+				}
 				
 				//Call the thread for the timer here on this line
 				synchronized (SimpleFTPClient.class){
@@ -71,8 +85,6 @@ public class SimpleFTPClient {
 					changingWindow++;
 					sentNotAcked++;
 				}
-				
-				
 			}
 			
 			break;
@@ -130,6 +142,25 @@ public class SimpleFTPClient {
 	public class TimerRunnable implements Runnable {
 		public void run() {
 			
+		}
+	}
+	
+	public static class PacketTimer extends TimerTask {
+		int sequenceNumber;
+		long delay;
+		public PacketTimer (int sequenceNumber, long delay) {
+			this.sequenceNumber = sequenceNumber;
+			this.delay = delay;
+		}
+		public void run() {
+			String seqNumString = Integer.toString(sequenceNumber);
+			
+			if (receivedACK.contains(seqNumString)) {
+				
+			} else {
+				timedOutPackets.add(seqNumString);
+			}
+			this.cancel();
 		}
 	}
 }
