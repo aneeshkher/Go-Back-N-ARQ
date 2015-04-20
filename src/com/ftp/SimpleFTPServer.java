@@ -21,12 +21,13 @@ public class SimpleFTPServer {
 					+ " <port_no> <file_name> <probability>");
 			System.exit(1);
 		}
+		DatagramSocket udpServerSocket = null;
 		String fileName = args[1];
 		double probability = Double.parseDouble(args[2]);
 		int listenPort = Integer.parseInt(args[0]);
 		byte[] process = new byte[8192];
 
-		DatagramSocket udpServerSocket;
+
 		FileOutputStream file = new FileOutputStream(fileName,true);
 		byte[] receivedBytes = new byte[8192];
 		DatagramPacket receivedPacket = new DatagramPacket(receivedBytes,
@@ -34,11 +35,13 @@ public class SimpleFTPServer {
 		int sequenceNumber = 0;
 		int firstTime = 1;
 		
-		udpServerSocket = new DatagramSocket(listenPort,InetAddress.getLocalHost());
-
+		udpServerSocket = new DatagramSocket(listenPort);
+		
 		while (true) {
 			double r = Math.random();
+			System.out.println("Before receiving");
 			udpServerSocket.receive(receivedPacket);
+			System.out.println("After receiving");
 			if (r <= probability) {
 				System.out.println("Packet Loss due to probability " 
 						+ probability);
@@ -53,7 +56,7 @@ public class SimpleFTPServer {
 				InetAddress replyAddress = receivedPacket.getAddress();
 
 				byte[] seqNumberByte = new byte[32];
-				for (int i = 32; i < 63; i++) {
+				for (int i = 32; i < 64; i++) {
 					seqNumberByte[i] = process[i];
 				}
 				String seqNumberString = seqNumberByte.toString();
@@ -66,7 +69,7 @@ public class SimpleFTPServer {
 					file.write(dataBytes);
 					int ackNumber = seqNumberInt + dataBytes.length;
 					String sendString = "10101010101010100000000000000000";
-					sendString.concat(Integer.toString(ackNumber));
+					sendString.concat(Integer.toBinaryString(ackNumber));
 					byte[] sendBytes = sendString.getBytes();
 					DatagramPacket sendPacket = new DatagramPacket(sendBytes, sendBytes.length, replyAddress, replyPort);
 					udpServerSocket.send(sendPacket);
