@@ -41,7 +41,6 @@ public class SimpleFTPServer {
 			double r = Math.random();
 			System.out.println("Before receiving");
 			udpServerSocket.receive(receivedPacket);
-			System.out.println("After receiving");
 			if (r <= probability) {
 				System.out.println("Packet Loss due to probability " 
 						+ probability);
@@ -50,16 +49,27 @@ public class SimpleFTPServer {
 				udpServerSocket.receive(receivedPacket);
 			} else {
 				System.out.println("Receiving packet");
-				int dataLength = receivedPacket.getLength();
-				process = receivedPacket.getData();
+				//int dataLength = receivedPacket.getLength();
+				//process = receivedPacket.getData();
+				int byteIter = 0;
+				for (byte b : receivedPacket.getData()) {
+					process[byteIter] = b;
+					byteIter++;
+				}
+				int dataLength = process.length;
+				System.out.println("Process array is: " + new String(process));
 				int replyPort = receivedPacket.getPort();
 				InetAddress replyAddress = receivedPacket.getAddress();
-
+				System.out.println("process array length: " + process.length);
 				byte[] seqNumberByte = new byte[32];
-				for (int i = 32; i < 64; i++) {
-					seqNumberByte[i] = process[i];
+				for (int i = 0; i < 16; i++) {
+					System.out.println(new String(process).charAt(i));
 				}
-				String seqNumberString = seqNumberByte.toString();
+				for (int i = 32; i < 64; i++) {
+					seqNumberByte[32 - i] = process[i];
+				}
+				//String seqNumberString = seqNumberByte.toString();
+				String seqNumberString = new String(seqNumberByte);
 				int seqNumberInt = Integer.parseInt(seqNumberString, 2);
 				if (seqNumberInt == sequenceNumber) {
 					byte[] dataBytes = new byte[dataLength - 64];

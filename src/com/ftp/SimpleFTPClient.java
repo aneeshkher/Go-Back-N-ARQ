@@ -61,13 +61,22 @@ public class SimpleFTPClient {
 				for (int i = readOffset; i < readOffset + MSS - 1; i++) {
 					sendData[i] = buffer[i];
 				}
-				String sendDataString = sendData.toString();
+				//String sendDataString = sendData.toString();
+				String sendDataString = new String(sendData);
 				readOffset = readOffset + MSS;
 				String sendDataPacket = "01010101010101011111111111111111";
-				sendDataPacket = sendDataPacket.concat(Integer.toBinaryString(sequenceNumber));
+				String sequenceNumberString = Integer.toBinaryString(sequenceNumber);
+				for (int i = 0; i < 32 - Integer.toBinaryString(sequenceNumber).length(); i++) {
+					sequenceNumberString = "0".concat(sequenceNumberString);
+				}
+				System.out.println("Sequence number string form: " + sequenceNumberString);
+				sendDataPacket = sendDataPacket.concat(sequenceNumberString);
 				sendDataPacket = sendDataPacket.concat(sendDataString);
 				byte[] sendBytes = sendDataPacket.getBytes();
+				System.out.println("Decoded sendbytes: " + new String(sendBytes));
 				DatagramPacket sendPacket = new DatagramPacket(sendBytes, sendBytes.length, IPAddress, serverPort);
+				System.out.println("Sending bytes: ");
+				System.out.println(sendBytes.toString());
 				udpClientSocket.send(sendPacket);
 				PacketTimer p1 = new PacketTimer(sequenceNumber, (long)1000);
 				Timer t1 = new Timer();
