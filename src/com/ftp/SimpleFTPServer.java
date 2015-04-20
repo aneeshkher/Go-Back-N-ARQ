@@ -60,7 +60,7 @@ public class SimpleFTPServer {
 				InetAddress replyAddress = receivedPacket.getAddress();
 				String seqNumberString = "";
 				for (int i = 32; i < 64; i++) {
-					seqNumberString.concat(Character.toString(filePacket.charAt(i)));
+					seqNumberString = seqNumberString.concat(Character.toString(filePacket.charAt(i)));
 				}
 				//String seqNumberString = seqNumberByte.toString();
 				seqNumberString = seqNumberString.substring(1);
@@ -69,13 +69,13 @@ public class SimpleFTPServer {
 					//byte[] dataBytes = new byte[dataLength - 64];
 					String dataString = "";
 					for (int i = 64; i < dataLength; i++) {
-						dataString.concat(Character.toString(filePacket.charAt(i)));
+						dataString = dataString.concat(Character.toString(filePacket.charAt(i)));
 					}
 					byte[] dataBytes = dataString.getBytes();
 					file.write(dataBytes);
 					int ackNumber = seqNumberInt + dataBytes.length;
 					String sendString = "10101010101010100000000000000000";
-					sendString.concat(Integer.toBinaryString(ackNumber));
+					sendString = sendString.concat(Integer.toBinaryString(ackNumber));
 					byte[] sendBytes = sendString.getBytes();
 					DatagramPacket sendPacket = new DatagramPacket(sendBytes, sendBytes.length, replyAddress, replyPort);
 					udpServerSocket.send(sendPacket);
