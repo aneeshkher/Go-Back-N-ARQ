@@ -3,6 +3,7 @@ package com.ftp;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -51,6 +52,19 @@ public class FileOperations {
 		}
 	}
 	
+	public static String testReader(FileInputStream fileStream) throws Exception {
+		//FileInputStream fileStream = new FileInputStream(fileName);
+		byte[] buffer = new byte[1024];
+		int bRead1 = fileStream.read(buffer, 0, buffer.length);
+		System.out.println("Read: ");
+		//System.out.println(new String(buffer));
+		return new String(buffer);
+	}
+		
+		/*int bRead2 = fileStream.read(buffer, 0, buffer.length);
+		System.out.println("Read 2: ");
+		System.out.println(new String(buffer));*/
+		
 	private static int getFileLength (BufferedReader reader) {
 		String line;
 		int count = 0;
