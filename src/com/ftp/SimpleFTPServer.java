@@ -43,7 +43,7 @@ public class SimpleFTPServer {
 			udpServerSocket.receive(receivedPacket);
 			String filePacket = new String(receivedPacket.getData());
 			System.out.println("Received packet from client: ");
-			System.out.println(filePacket);
+			//System.out.println(filePacket);
 			if (r <= probability) {
 				System.out.println("Packet Loss due to probability " 
 						+ probability);

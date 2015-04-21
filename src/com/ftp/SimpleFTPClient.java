@@ -24,6 +24,8 @@ public class SimpleFTPClient {
 	static HashMap<Integer, String> unackData = new HashMap<>();
 	static Queue<String> timedOutPackets = new LinkedList<String>();
 	public static void main(String[] args) throws Exception {
+		
+		SimpleFTPClient obj = new SimpleFTPClient();
 		// TODO Auto-generated method stub
 		System.out.println(args.length);
 		if (args.length != 5) {
@@ -50,9 +52,10 @@ public class SimpleFTPClient {
 		HashMap<Integer, Long> expectedReceiveTime = new HashMap<>();
 		
 		int maxSend = windowSize;
-		
-		new Thread(new ReceiveRunnable()).start();
-		
+		ReceiveRunnable thread = new ReceiveRunnable(udpClientSocket);
+		new Thread(thread).start();
+		thread.terminate();
+	
 		while(true) {
 			int bytesRead = fileStream.read(buffer, 0, buffer.length);
 			int readOffset = 0;
@@ -95,23 +98,10 @@ public class SimpleFTPClient {
 					sentNotAcked++;
 				}
 			}
-			
 			break;
 		}
-		byte[] sendDataBytes = "Hope this is received".getBytes();
-		for (byte b : sendDataBytes) {
-			System.out.print(b);
-		}
-		/*DatagramPacket sendPacket = new DatagramPacket(sendDataBytes, sendDataBytes.length
-				, IPAddress, serverPort);*/
-		DatagramPacket sendPacket = new DatagramPacket(sendDataBytes, 5, 5,
-				IPAddress, serverPort);
-		try {
-			udpClientSocket.send(sendPacket);
-		} catch (Exception e2) {
-			e2.printStackTrace();
-		}
 		
+		System.exit(0);
 	}
 	public static void receiveACK() {
 		
@@ -121,32 +111,7 @@ public class SimpleFTPClient {
 		return udpClientSocket;
 	}
 	
-	public static class ReceiveRunnable implements Runnable {
-		public void run() {
-			byte[] receivedBytes = new byte[8192];
-			DatagramPacket receivedPacket = new DatagramPacket(receivedBytes,
-					receivedBytes.length);
-			while (true) {
-				try {
-					byte[] ACKNumber = new byte[32];
-					
-					udpClientSocket.receive(receivedPacket);
-					synchronized (this) {
-						for (int i = 32; i < 64; i++) {
-							ACKNumber[i-32] = receivedBytes[i];
-						}
-						receivedACK.add(ACKNumber.toString());
-						int seqNo = Integer.parseInt(ACKNumber.toString(), 2) - MSS;
-						unackData.remove(seqNo);
-						ACKed++;
-					}
-					
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-			}
-		}
-	}
+
 	
 	public class TimerRunnable implements Runnable {
 		public void run() {
@@ -162,6 +127,7 @@ public class SimpleFTPClient {
 			this.delay = delay;
 		}
 		public void run() {
+			System.out.println("Inside timer thread for: " + sequenceNumber);
 			String seqNumString = Integer.toString(sequenceNumber);
 			
 			if (receivedACK.contains(seqNumString)) {
