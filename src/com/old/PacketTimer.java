@@ -1,6 +1,8 @@
-package com.ftp;
+package com.old;
 
 import java.util.TimerTask;
+
+import com.ftp.TestSimpleFTPClientData;
 
 public class PacketTimer extends TimerTask {
 	int sequenceNumber;

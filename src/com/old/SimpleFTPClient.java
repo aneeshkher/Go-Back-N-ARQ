@@ -1,4 +1,4 @@
-package com.ftp;
+package com.old;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,6 +13,8 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import com.ftp.ReceiveRunnable;
 
 public class SimpleFTPClient {
 

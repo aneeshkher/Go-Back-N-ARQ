@@ -1,4 +1,4 @@
-package com.ftp;
+package com.old;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
