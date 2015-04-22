@@ -3,15 +3,23 @@ package com.ftp;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class TestSimpleFTPClientData {
 	
 	static HashMap<Integer, Integer> window = new HashMap<>();
 	static HashMap<Integer, String> unacknowledged = new HashMap<>();
 	static Queue<Integer> timedOutPackets = new LinkedList<Integer>();
+	static ArrayList<Integer> receivedACK =  new ArrayList<>();
+	static Lock lock = new ReentrantLock();
+	static int acknowledged;
+	static int outstanding;
+	static int sentNotAcknowledged;
 	
 	public String getDataPacket(FileInputStream fileStream, int MSS,
 			int sequenceNumber) {
@@ -29,6 +37,16 @@ public class TestSimpleFTPClientData {
 
 		}
 		return "Cannot read from file";
+	}
+	
+	public static String getACKNumberFromACK (String ACK) {
+		String ACKNumberString = "";
+		for (int i = 32; i < 64; i++) {
+			ACKNumberString = ACKNumberString.concat(Character
+					.toString(ACK.charAt(i)));
+		}
+		
+		return ACKNumberString;
 	}
 
 	public static String getBinaryString(int sequenceNumber) {

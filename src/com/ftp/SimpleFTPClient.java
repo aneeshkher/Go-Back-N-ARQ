@@ -119,23 +119,5 @@ public class SimpleFTPClient {
 		}
 	}
 	
-	public static class PacketTimer extends TimerTask {
-		int sequenceNumber;
-		long delay;
-		public PacketTimer (int sequenceNumber, long delay) {
-			this.sequenceNumber = sequenceNumber;
-			this.delay = delay;
-		}
-		public void run() {
-			System.out.println("Inside timer thread for: " + sequenceNumber);
-			String seqNumString = Integer.toString(sequenceNumber);
-			
-			if (receivedACK.contains(seqNumString)) {
-				
-			} else {
-				timedOutPackets.add(seqNumString);
-			}
-			this.cancel();
-		}
-	}
+	
 }

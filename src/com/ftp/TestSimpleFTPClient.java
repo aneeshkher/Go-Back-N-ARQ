@@ -7,9 +7,6 @@ import java.net.InetAddress;
 
 public class TestSimpleFTPClient {
 
-	static int acknowledged;
-	static int outstanding;
-	static int sentNotAcknowledged;
 	static DatagramSocket udpClientSocket = null;
 
 	public static void main(String[] args) throws Exception {
@@ -41,18 +38,23 @@ public class TestSimpleFTPClient {
 
 		udpClientSocket = new DatagramSocket();
 		InetAddress IPAddress = InetAddress.getByName(serverHostName);
-		Long fileLength;
-		fileLength = data.getFileLength(fileName);
-		int fileLengthBytes = fileLength.intValue();
+		// Long fileLength;
+		// fileLength = data.getFileLength(fileName);
+		// int fileLengthBytes = fileLength.intValue();
 
-		acknowledged = 0;
-		outstanding = 0;
-		sentNotAcknowledged = 0;
+		TestSimpleFTPClientData.acknowledged = 0;
+		TestSimpleFTPClientData.outstanding = 0;
+		TestSimpleFTPClientData.sentNotAcknowledged = 0;
 		int sequenceNumber = 0;
+		int packetSize = MSS + 48;
+
+		ReceiveRunnable receiveThread = new ReceiveRunnable(udpClientSocket);
+		Thread thread = new Thread(receiveThread, "receive");
+		thread.start();
 
 		while (true) { // Outer loop. Keep on sending
-			while (outstanding <= windowSize) { // Inner loop. Keep doing this
-												// as long as window permits
+			while (TestSimpleFTPClientData.outstanding <= windowSize) {
+
 				String dataString = data.getDataPacket(fileStream, MSS,
 						sequenceNumber);
 				TestSimpleFTPClientData.window.put(0, sequenceNumber);
@@ -61,14 +63,17 @@ public class TestSimpleFTPClient {
 				DatagramPacket sendPacket = new DatagramPacket(sendDataBytes,
 						sendDataBytes.length, IPAddress, serverPort);
 
-				synchronized (data) {
-					udpClientSocket.send(sendPacket);
-					TestSimpleFTPClientData.unacknowledged.put(sequenceNumber,
-							dataString);
-					sentNotAcknowledged++;
-					outstanding = sentNotAcknowledged - acknowledged;
+				// synchronized (data)
+				TestSimpleFTPClientData.lock.lock();
+				udpClientSocket.send(sendPacket);
+				TestSimpleFTPClientData.unacknowledged.put(sequenceNumber,
+						dataString);
+				TestSimpleFTPClientData.sentNotAcknowledged++;
+				TestSimpleFTPClientData.outstanding = TestSimpleFTPClientData.sentNotAcknowledged
+						- TestSimpleFTPClientData.acknowledged;
+				TestSimpleFTPClientData.lock.unlock();
 
-				} // End of synchronized
+				// } // End of synchronized
 
 			} // End of while for outstanding <= window size
 
