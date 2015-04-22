@@ -66,11 +66,13 @@ public class TestSimpleFTPClient {
 				if (dataString.length() < packetSize) {
 					last = 1;
 				}
-				System.out.println("Sending data from client: ");
-				System.out.println(dataString);
+
 				TestSimpleFTPClientData.window.put(0, sequenceNumber);
 
 				byte[] sendDataBytes = dataString.getBytes();
+				System.out.println("Sending data from client: "
+						+ dataString.length() + " " + sendDataBytes.length);
+				System.out.println(dataString);
 				DatagramPacket sendPacket = new DatagramPacket(sendDataBytes,
 						sendDataBytes.length, IPAddress, serverPort);
 
@@ -86,9 +88,10 @@ public class TestSimpleFTPClient {
 				TimerPacket p1 = new TimerPacket(sequenceNumber);
 				Timer t1 = new Timer();
 				TestSimpleFTPClientData.timers.put(sequenceNumber, t1);
-				t1.schedule(p1, (long)1000);
+				t1.schedule(p1, (long) 1000);
 				sequenceNumber += MSS;
-				System.out.println("Sending next packet with seq number: " + sequenceNumber);
+				System.out.println("Sending next packet with seq number: "
+						+ sequenceNumber);
 				System.out.println("");
 				if (last == 1) {
 					break;
@@ -108,8 +111,8 @@ public class TestSimpleFTPClient {
 	public static void sendOutstandingPackets(int sequenceNumber)
 			throws IOException {
 		/*
-		 * Get the timer object for the associated sequence number
-		 * Cancel the timer for the remaining outstanding packets.
+		 * Get the timer object for the associated sequence number Cancel the
+		 * timer for the remaining outstanding packets.
 		 */
 		while (TestSimpleFTPClientData.timers.containsKey(sequenceNumber)) {
 			Timer t = TestSimpleFTPClientData.timers.get(sequenceNumber);
@@ -133,7 +136,7 @@ public class TestSimpleFTPClient {
 			TimerPacket p1 = new TimerPacket(sequenceNumber);
 			Timer t1 = new Timer();
 			TestSimpleFTPClientData.timers.put(sequenceNumber, t1);
-			t1.schedule(p1, (long)1000);
+			t1.schedule(p1, (long) 1000);
 			sequenceNumber += MSS;
 
 		}

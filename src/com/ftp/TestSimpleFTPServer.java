@@ -1,6 +1,9 @@
 package com.ftp;
 
+import java.io.BufferedWriter;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -22,7 +25,13 @@ public class TestSimpleFTPServer {
 		int MSS = 200;
 
 		TestSimpleFTPServerData data1 = new TestSimpleFTPServerData();
-		FileOutputStream file = new FileOutputStream(fileName, true);
+		
+		//FileOutputStream file = new FileOutputStream(fileName, true);
+		//BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true));
+		FileWriter file = new FileWriter(fileName, true);
+		//PrintWriter outFile = new PrintWriter(fileName, "UTF-8");
+		
+		
 		DatagramSocket udpServerSocket = null;
 		byte[] receivedBytes = new byte[8192];
 		DatagramPacket receivedPacket = new DatagramPacket(receivedBytes,
@@ -58,8 +67,16 @@ public class TestSimpleFTPServer {
 						+ sequenceNumberInt);
 				if (sequenceNumberInt == sequenceNumber) {
 					String dataString = filePacket
-							.substring(64, dataLength);
-					data1.writeToFile(file, dataString);
+							.substring(64, MSS + 64);
+					System.out.println("Writing to file: " + dataString.length());
+					System.out.println(dataString);
+					
+					//data1.writeToFile(file, dataString);
+					//outFile.append(dataString);
+					//writer.write(dataString);
+					file.write(dataString);
+					file.flush();
+					
 					String sendString = data1.getSendPacket(sequenceNumber);
 					System.out.println("Sending ACK packet as: " + sendString);
 					byte[] sendBytes = sendString.getBytes();
