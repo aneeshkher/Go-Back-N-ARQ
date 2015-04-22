@@ -79,6 +79,7 @@ public class TestSimpleFTPClient {
 				TestSimpleFTPClientData.lock.unlock();
 				TimerPacket p1 = new TimerPacket(sequenceNumber);
 				Timer t1 = new Timer();
+				TestSimpleFTPClientData.timers.put(sequenceNumber, t1);
 				t1.schedule(p1, (long)1000);
 
 				// } // End of synchronized
@@ -93,7 +94,14 @@ public class TestSimpleFTPClient {
 			throws IOException {
 		/*
 		 * Get the timer object for the associated sequence number
+		 * Cancel the timer for the remaining outstanding packets.
 		 */
+		while (TestSimpleFTPClientData.timers.containsKey(sequenceNumber)) {
+			Timer t = TestSimpleFTPClientData.timers.get(sequenceNumber);
+			t.cancel();
+			TestSimpleFTPClientData.timers.remove(sequenceNumber);
+			sequenceNumber += MSS;
+		}
 
 		/*
 		 * From that sequence till the end, send the packets again. Start timer
@@ -109,6 +117,7 @@ public class TestSimpleFTPClient {
 			udpClientSocket.send(sendPacket);
 			TimerPacket p1 = new TimerPacket(sequenceNumber);
 			Timer t1 = new Timer();
+			TestSimpleFTPClientData.timers.put(sequenceNumber, t1);
 			t1.schedule(p1, (long)1000);
 			sequenceNumber += MSS;
 

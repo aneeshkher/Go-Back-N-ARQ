@@ -3,6 +3,7 @@ package com.ftp;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.util.Timer;
 
 public class ReceiveRunnable implements Runnable {
 	private volatile boolean running = true;
@@ -39,6 +40,15 @@ public class ReceiveRunnable implements Runnable {
 					TestSimpleFTPClientData.outstanding = TestSimpleFTPClientData.sentNotAcknowledged
 							- TestSimpleFTPClientData.acknowledged;
 					TestSimpleFTPClientData.lock.unlock();
+
+					// Remove the timer objects since the packet has been
+					// received.
+					if (TestSimpleFTPClientData.timers.containsKey(receivedACK)) {
+						Timer t = TestSimpleFTPClientData.timers
+								.get(receivedACK);
+						t.cancel();
+						TestSimpleFTPClientData.timers.remove(receivedACK);
+					}
 
 				} catch (IOException e1) {
 
