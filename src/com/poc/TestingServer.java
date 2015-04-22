@@ -1,4 +1,4 @@
-package com.ftp;
+package com.poc;
 
 import java.io.*;
 import java.net.*;
