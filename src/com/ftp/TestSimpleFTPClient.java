@@ -1,13 +1,18 @@
 package com.ftp;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.Timer;
 
 public class TestSimpleFTPClient {
 
 	static DatagramSocket udpClientSocket = null;
+	static int MSS;
+	static InetAddress IPAddress;
+	static int serverPort;
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
@@ -28,16 +33,16 @@ public class TestSimpleFTPClient {
 			System.exit(1);
 		}
 		String serverHostName = args[0];
-		int serverPort = Integer.parseInt(args[1]);
+		serverPort = Integer.parseInt(args[1]);
 		String fileName = args[2];
 		int windowSize = Integer.parseInt(args[3]);
-		int MSS = Integer.parseInt(args[4]);
+		MSS = Integer.parseInt(args[4]);
 
 		TestSimpleFTPClientData data = new TestSimpleFTPClientData();
 		FileInputStream fileStream = new FileInputStream(fileName);
 
 		udpClientSocket = new DatagramSocket();
-		InetAddress IPAddress = InetAddress.getByName(serverHostName);
+		IPAddress = InetAddress.getByName(serverHostName);
 		// Long fileLength;
 		// fileLength = data.getFileLength(fileName);
 		// int fileLengthBytes = fileLength.intValue();
@@ -72,6 +77,9 @@ public class TestSimpleFTPClient {
 				TestSimpleFTPClientData.outstanding = TestSimpleFTPClientData.sentNotAcknowledged
 						- TestSimpleFTPClientData.acknowledged;
 				TestSimpleFTPClientData.lock.unlock();
+				TimerPacket p1 = new TimerPacket(sequenceNumber);
+				Timer t1 = new Timer();
+				t1.schedule(p1, (long)1000);
 
 				// } // End of synchronized
 
@@ -80,5 +88,31 @@ public class TestSimpleFTPClient {
 		} // End of while(true)
 
 	} // End of static void main
+
+	public static void sendOutstandingPackets(int sequenceNumber)
+			throws IOException {
+		/*
+		 * Get the timer object for the associated sequence number
+		 */
+
+		/*
+		 * From that sequence till the end, send the packets again. Start timer
+		 * for each packet.
+		 */
+		while (TestSimpleFTPClientData.unacknowledged
+				.containsKey(sequenceNumber)) {
+			String sendData = TestSimpleFTPClientData.unacknowledged
+					.get(sequenceNumber);
+			byte[] sendDataBytes = sendData.getBytes();
+			DatagramPacket sendPacket = new DatagramPacket(sendDataBytes,
+					sendDataBytes.length, IPAddress, serverPort);
+			udpClientSocket.send(sendPacket);
+			TimerPacket p1 = new TimerPacket(sequenceNumber);
+			Timer t1 = new Timer();
+			t1.schedule(p1, (long)1000);
+			sequenceNumber += MSS;
+
+		}
+	}
 
 } // End of class
