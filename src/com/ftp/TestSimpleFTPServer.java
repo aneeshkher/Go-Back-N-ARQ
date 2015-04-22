@@ -19,6 +19,8 @@ public class TestSimpleFTPServer {
 		String fileName = args[1];
 		double probability = Double.parseDouble(args[2]);
 
+		int MSS = 200;
+
 		TestSimpleFTPServerData data1 = new TestSimpleFTPServerData();
 		FileOutputStream file = new FileOutputStream(fileName, true);
 		DatagramSocket udpServerSocket = null;
@@ -41,22 +43,33 @@ public class TestSimpleFTPServer {
 			} else {
 				System.out.println("Receiving packet");
 				String filePacket = new String(receivedPacket.getData());
+				System.out.println("Received Packet:");
+				System.out.println(filePacket);
 				int dataLength = filePacket.length();
 				int replyPort = receivedPacket.getPort();
 				InetAddress replyAddress = receivedPacket.getAddress();
-				String sequenceNumberString = (filePacket.substring(32, 63))
+				String sequenceNumberString = (filePacket.substring(32, 64))
 						.substring(1);
+				System.out.println("Getting sequence number from: " + sequenceNumberString
+						+ " with length: " + sequenceNumberString.length());
 				int sequenceNumberInt = Integer.parseInt(sequenceNumberString,
 						2);
+				System.out.println("Extracted sequence number as: "
+						+ sequenceNumberInt);
 				if (sequenceNumberInt == sequenceNumber) {
 					String dataString = filePacket
-							.substring(64, dataLength - 1);
+							.substring(64, dataLength);
 					data1.writeToFile(file, dataString);
 					String sendString = data1.getSendPacket(sequenceNumber);
+					System.out.println("Sending ACK packet as: " + sendString);
 					byte[] sendBytes = sendString.getBytes();
 					DatagramPacket sendPacket = new DatagramPacket(sendBytes,
 							sendBytes.length, replyAddress, replyPort);
 					udpServerSocket.send(sendPacket);
+					sequenceNumber += MSS;
+					System.out.println("Next expected sequence number is: "
+							+ sequenceNumber);
+					System.out.println("");
 				} else {
 					System.out.println("Wrong sequence received");
 					continue;

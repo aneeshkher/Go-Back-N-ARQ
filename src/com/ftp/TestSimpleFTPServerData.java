@@ -12,7 +12,8 @@ public class TestSimpleFTPServerData {
 	public String getSendPacket(int ackNumber) {
 		String sendString = "10101010101010100000000000000000";
 		String ackNumberString = Integer.toBinaryString(ackNumber);
-		for (int i = 0; i < 32 - ackNumberString.length(); i++) {
+		int length = ackNumberString.length();
+		for (int i = 0; i < 32 - length; i++) {
 			ackNumberString = "0".concat(ackNumberString);
 		}
 		sendString = sendString.concat(ackNumberString);

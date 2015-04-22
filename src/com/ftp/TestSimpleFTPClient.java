@@ -51,7 +51,8 @@ public class TestSimpleFTPClient {
 		TestSimpleFTPClientData.outstanding = 0;
 		TestSimpleFTPClientData.sentNotAcknowledged = 0;
 		int sequenceNumber = 0;
-		int packetSize = MSS + 48;
+		int packetSize = MSS + 64;
+		int last = 0;
 
 		ReceiveRunnable receiveThread = new ReceiveRunnable(udpClientSocket);
 		Thread thread = new Thread(receiveThread, "receive");
@@ -62,6 +63,11 @@ public class TestSimpleFTPClient {
 
 				String dataString = data.getDataPacket(fileStream, MSS,
 						sequenceNumber);
+				if (dataString.length() < packetSize) {
+					last = 1;
+				}
+				System.out.println("Sending data from client: ");
+				System.out.println(dataString);
 				TestSimpleFTPClientData.window.put(0, sequenceNumber);
 
 				byte[] sendDataBytes = dataString.getBytes();
@@ -81,10 +87,19 @@ public class TestSimpleFTPClient {
 				Timer t1 = new Timer();
 				TestSimpleFTPClientData.timers.put(sequenceNumber, t1);
 				t1.schedule(p1, (long)1000);
+				sequenceNumber += MSS;
+				System.out.println("Sending next packet with seq number: " + sequenceNumber);
+				System.out.println("");
+				if (last == 1) {
+					break;
+				}
 
 				// } // End of synchronized
 
 			} // End of while for outstanding <= window size
+			if (last == 1) {
+				break;
+			}
 
 		} // End of while(true)
 

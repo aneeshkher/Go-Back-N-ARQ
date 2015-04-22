@@ -26,6 +26,8 @@ public class ReceiveRunnable implements Runnable {
 			while (true) {
 				try {
 					udpClientSocket.receive(receivedPacket);
+					System.out.println("Received ACK:");
+					System.out.println(new String(receivedPacket.getData()));
 					// synchronized (data)
 					TestSimpleFTPClientData.lock.lock();
 					String received = new String(receivedPacket.getData());

@@ -18,11 +18,12 @@ public class TimerPacket extends TimerTask {
 			
 		} else {
 			TestSimpleFTPClientData.timedOutPackets.add(sequenceNumber);
-			try {
-				TestSimpleFTPClient.sendOutstandingPackets(sequenceNumber);
+			/*try {
+				//TestSimpleFTPClient.sendOutstandingPackets(sequenceNumber);
+				;
 			} catch (IOException e1) {
 				
-			}
+			}*/
 		}
 		//this.cancel();
 	}

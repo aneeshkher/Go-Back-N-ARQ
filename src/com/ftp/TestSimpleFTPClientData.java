@@ -53,7 +53,8 @@ public class TestSimpleFTPClientData {
 
 	public static String getBinaryString(int sequenceNumber) {
 		String seqNumString = Integer.toBinaryString(sequenceNumber);
-		for (int i = 0; i < 32 - seqNumString.length(); i++) {
+		int length = seqNumString.length();
+		for (int i = 0; i < 32 - length; i++) {
 			seqNumString = "0".concat(seqNumString);
 		}
 		return seqNumString;
