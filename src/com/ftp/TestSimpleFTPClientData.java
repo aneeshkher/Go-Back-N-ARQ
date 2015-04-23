@@ -24,23 +24,32 @@ public class TestSimpleFTPClientData {
 	static int acknowledged;
 	static int outstanding;
 	static int sentNotAcknowledged;
+	static int fileLengthInt;
 	
-	public String getDataPacket(FileInputStream fileStream, int MSS,
+	public ReturnValues getDataPacket(FileInputStream fileStream, int MSS,
 			int sequenceNumber) {
 		byte[] bytes = new byte[MSS];
+		ReturnValues r1 = new ReturnValues();
+		r1.last = 0;
 		try {
-			fileStream.read(bytes, 0, bytes.length);
+			int total = fileStream.read(bytes, 0, bytes.length);
+			if (total == MSS) {
+				r1.last = 0;
+			} else {
+				r1.last = 1;
+			}
 			String dataBytesString = new String(bytes);
 			String startFrame = "0101010101010101";
 			String checkSum = "1111111111111111";
 			String dataBytes = startFrame.concat(checkSum)
 					.concat(getBinaryString(sequenceNumber))
 					.concat(dataBytesString);
-			return dataBytes;
+			r1.dataBytes = dataBytes;
+			return r1;
 		} catch (IOException e1) {
 
 		}
-		return "Cannot read from file";
+		return r1;
 	}
 	
 	public static String getACKNumberFromACK (String ACK) {
@@ -71,6 +80,7 @@ public class TestSimpleFTPClientData {
 	public long getFileLength(String fileName) {
 		File file = new File(fileName);
 		Long fileLength = file.length();
+		fileLengthInt = fileLength.intValue();
 		return fileLength;
 	}
 }
