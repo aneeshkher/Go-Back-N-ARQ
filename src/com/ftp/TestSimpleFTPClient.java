@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Timer;
 
 public class TestSimpleFTPClient {
@@ -70,36 +72,52 @@ public class TestSimpleFTPClient {
 				TestSimpleFTPClientData.window.put(0, sequenceNumber);
 
 				byte[] sendDataBytes = dataString.getBytes();
-				System.out.println("Sending data from client: "
+				System.out.print("Sending data from client: "
 						+ dataString.length() + " " + sendDataBytes.length);
-				System.out.println(dataString);
+				System.out.print(". Sequence number: " + sequenceNumber + ". ");
+				// System.out.println(dataString);
 				DatagramPacket sendPacket = new DatagramPacket(sendDataBytes,
 						sendDataBytes.length, IPAddress, serverPort);
 
 				// synchronized (data)
-				TestSimpleFTPClientData.lock.lock();
+				
 				udpClientSocket.send(sendPacket);
+				
+				
 				TestSimpleFTPClientData.unacknowledged.put(sequenceNumber,
 						dataString);
+				TestSimpleFTPClientData.lock.lock();
 				TestSimpleFTPClientData.sentNotAcknowledged++;
 				TestSimpleFTPClientData.outstanding = TestSimpleFTPClientData.sentNotAcknowledged
 						- TestSimpleFTPClientData.acknowledged;
 				TestSimpleFTPClientData.lock.unlock();
+				
 				TimerPacket p1 = new TimerPacket(sequenceNumber);
 				Timer t1 = new Timer();
 				TestSimpleFTPClientData.timers.put(sequenceNumber, t1);
 				t1.schedule(p1, (long) 1000);
+				if (TestSimpleFTPClientData.unacknowledged.containsKey(sequenceNumber)) {
+					System.out.println(". Value inserted successfully!");
+				} else {
+					System.out.println(". Could not insert value into unacknowledged");
+				}
 				sequenceNumber += MSS;
-				System.out.println("Sending next packet with seq number: "
+				System.out.print("Outstanding: " + TestSimpleFTPClientData.outstanding);
+				System.out.println(". Sending next packet with seq number: "
 						+ sequenceNumber);
 				System.out.println("");
 				if (last == 1) {
 					break;
 				}
+				//System.out.println("Timed Out Queue: " + );
+				
 
 				// } // End of synchronized
 
 			} // End of while for outstanding <= window size
+			/*if (!TestSimpleFTPClientData.timedOutPackets.isEmpty()) {
+				sendOutstandingPackets(TestSimpleFTPClientData.timedOutPackets.poll());
+			}*/
 			if (last == 1) {
 				break;
 			}
@@ -108,38 +126,76 @@ public class TestSimpleFTPClient {
 
 	} // End of static void main
 
-	public static void sendOutstandingPackets(int sequenceNumber)
+	public static synchronized void sendOutstandingPackets(int sequenceNumber)
 			throws IOException {
+		//TestSimpleFTPClientData.lock.lock();
+		System.out.println("Resending all packets from: " + sequenceNumber);
+		/*for (Entry<Integer, Timer> entry : TestSimpleFTPClientData.timers.entrySet()) {
+			System.out.println(entry.getKey());
+		}*/
+
 		/*
 		 * Get the timer object for the associated sequence number Cancel the
 		 * timer for the remaining outstanding packets.
 		 */
-		while (TestSimpleFTPClientData.timers.containsKey(sequenceNumber)) {
-			Timer t = TestSimpleFTPClientData.timers.get(sequenceNumber);
+		int temp = sequenceNumber + MSS;
+		while (TestSimpleFTPClientData.timers.containsKey(temp)) {
+			System.out.println("Canceling timer for: " + temp);
+			Timer t = TestSimpleFTPClientData.timers.get(temp);
 			t.cancel();
-			TestSimpleFTPClientData.timers.remove(sequenceNumber);
-			sequenceNumber += MSS;
+			TestSimpleFTPClientData.timers.remove(temp);
+			temp += MSS;
 		}
+		
+		
 
 		/*
 		 * From that sequence till the end, send the packets again. Start timer
 		 * for each packet.
 		 */
-		while (TestSimpleFTPClientData.unacknowledged
-				.containsKey(sequenceNumber)) {
+		//int temp = sequenceNumber;
+		/*while(true) {
+			if (TestSimpleFTPClientData.unacknowledged.containsKey(temp)) {
+				System.out.println("Checking for: " + temp);
+			} else {
+				break;
+			}
+			temp = temp + MSS;
+		}*/
+		boolean test = TestSimpleFTPClientData.unacknowledged
+				.containsKey(sequenceNumber);
+		System.out.println("Before getting unACKed packets: " + test);
+		System.out.println(TestSimpleFTPClientData.unacknowledged.get(sequenceNumber));
+		temp = sequenceNumber + MSS;
+		while (TestSimpleFTPClientData.unacknowledged.containsKey(temp)) {
+			System.out.println("Sending: " + temp );
 			String sendData = TestSimpleFTPClientData.unacknowledged
-					.get(sequenceNumber);
+					.get(temp);
+			System.out.println("Resending: " + temp);
 			byte[] sendDataBytes = sendData.getBytes();
 			DatagramPacket sendPacket = new DatagramPacket(sendDataBytes,
 					sendDataBytes.length, IPAddress, serverPort);
 			udpClientSocket.send(sendPacket);
-			TimerPacket p1 = new TimerPacket(sequenceNumber);
+			TimerPacket p1 = new TimerPacket(temp);
 			Timer t1 = new Timer();
-			TestSimpleFTPClientData.timers.put(sequenceNumber, t1);
+			TestSimpleFTPClientData.timers.put(temp, t1);
 			t1.schedule(p1, (long) 1000);
 			sequenceNumber += MSS;
 
 		}
+		for (int i = 200; i < 4001; i += 200) {
+			System.out.println("Getting for i = " + i);
+			TestSimpleFTPClientData.unacknowledged.get(i);
+		}
+		/*System.out.println("After getting unACKed packets");
+		for (Entry<Integer, String> entry : TestSimpleFTPClientData.unacknowledged
+				.entrySet()) {
+			if (entry.getKey() == sequenceNumber) 
+				System.out.println("Checking for equality for first one");
+			System.out.println(entry.getKey() + ": "
+					+ entry.getValue().substring(64, 80));
+		}*/
+		//TestSimpleFTPClientData.lock.lock();
 	}
 
 } // End of class

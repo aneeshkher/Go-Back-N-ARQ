@@ -15,12 +15,13 @@ public class TimerPacket extends TimerTask {
 		//String seqNumString = Integer.toString(sequenceNumber);
 		
 		if (TestSimpleFTPClientData.receivedACK.contains(sequenceNumber)) {
-			
+			System.out.println("Packet received within time");
 		} else {
+			System.out.println("Packet timed out: " + sequenceNumber);
 			TestSimpleFTPClientData.timedOutPackets.add(sequenceNumber);
 			/*try {
-				//TestSimpleFTPClient.sendOutstandingPackets(sequenceNumber);
-				;
+				System.out.println("Sending all packets from: " + sequenceNumber);
+				TestSimpleFTPClient.sendOutstandingPackets(sequenceNumber);
 			} catch (IOException e1) {
 				
 			}*/

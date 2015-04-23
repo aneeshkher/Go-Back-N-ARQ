@@ -26,23 +26,35 @@ public class ReceiveRunnable implements Runnable {
 			while (true) {
 				try {
 					udpClientSocket.receive(receivedPacket);
-					System.out.println("Received ACK:");
-					System.out.println(new String(receivedPacket.getData()));
+					//System.out.println("Received ACK:");
+					//System.out.println(new String(receivedPacket.getData()));
 					// synchronized (data)
-					TestSimpleFTPClientData.lock.lock();
+					
 					String received = new String(receivedPacket.getData());
 					String ACK = TestSimpleFTPClientData
 							.getACKNumberFromACK(received);
 					int receivedACK = TestSimpleFTPClientData
 							.getIntegerNumber(ACK);
+					if (TestSimpleFTPClientData.timedOutPackets.contains(receivedACK)) {
+						TestSimpleFTPClientData.timedOutPackets.remove(receivedACK);
+					}
 
 					TestSimpleFTPClientData.receivedACK.add(receivedACK);
+					
+					if (TestSimpleFTPClientData.unacknowledged.containsKey(receivedACK)) {
+						//System.out.println("Removing ACK for: " + receivedACK);
+					}
+						
 					TestSimpleFTPClientData.unacknowledged.remove(receivedACK);
+					
 					TestSimpleFTPClientData.acknowledged++;
+					TestSimpleFTPClientData.lock.lock();
 					TestSimpleFTPClientData.outstanding = TestSimpleFTPClientData.sentNotAcknowledged
 							- TestSimpleFTPClientData.acknowledged;
 					TestSimpleFTPClientData.lock.unlock();
-
+					
+					System.out.println("Received ACK: " + receivedACK + 
+							". Outstanding: " + TestSimpleFTPClientData.outstanding);
 					// Remove the timer objects since the packet has been
 					// received.
 					if (TestSimpleFTPClientData.timers.containsKey(receivedACK)) {

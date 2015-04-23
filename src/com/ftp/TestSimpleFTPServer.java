@@ -50,26 +50,26 @@ public class TestSimpleFTPServer {
 				System.out.println("Checksum failed. Dropping packet");
 				continue;
 			} else {
-				System.out.println("Receiving packet");
+				//System.out.println("Receiving packet");
 				String filePacket = new String(receivedPacket.getData());
-				System.out.println("Received Packet:");
-				System.out.println(filePacket);
+				System.out.print("Received Packet: ");
+				//System.out.println(filePacket);
 				int dataLength = filePacket.length();
 				int replyPort = receivedPacket.getPort();
 				InetAddress replyAddress = receivedPacket.getAddress();
 				String sequenceNumberString = (filePacket.substring(32, 64))
 						.substring(1);
-				System.out.println("Getting sequence number from: " + sequenceNumberString
-						+ " with length: " + sequenceNumberString.length());
+				/*System.out.println("Getting sequence number from: " + sequenceNumberString
+						+ " with length: " + sequenceNumberString.length());*/
 				int sequenceNumberInt = Integer.parseInt(sequenceNumberString,
 						2);
-				System.out.println("Extracted sequence number as: "
-						+ sequenceNumberInt);
+				System.out.print("Extracted sequence number as: "
+						+ sequenceNumberInt + ". ");
 				if (sequenceNumberInt == sequenceNumber) {
 					String dataString = filePacket
 							.substring(64, MSS + 64);
 					System.out.println("Writing to file: " + dataString.length());
-					System.out.println(dataString);
+					//System.out.println(dataString);
 					
 					//data1.writeToFile(file, dataString);
 					//outFile.append(dataString);

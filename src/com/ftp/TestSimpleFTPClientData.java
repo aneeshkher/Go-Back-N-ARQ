@@ -8,16 +8,18 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Timer;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class TestSimpleFTPClientData {
 	
-	static HashMap<Integer, Integer> window = new HashMap<>();
-	static HashMap<Integer, String> unacknowledged = new HashMap<>();
-	static Queue<Integer> timedOutPackets = new LinkedList<Integer>();
+	static ConcurrentHashMap<Integer, Integer> window = new ConcurrentHashMap<>();
+	static ConcurrentHashMap<Integer, String> unacknowledged = new ConcurrentHashMap<>();
+	static ConcurrentLinkedQueue<Integer> timedOutPackets = new ConcurrentLinkedQueue<Integer>();
 	static ArrayList<Integer> receivedACK =  new ArrayList<>();
-	static HashMap<Integer, Timer> timers = new HashMap<>();
+	static ConcurrentHashMap<Integer, Timer> timers = new ConcurrentHashMap<>();
 	static Lock lock = new ReentrantLock();
 	static int acknowledged;
 	static int outstanding;
