@@ -11,7 +11,8 @@ public class TimerPacket extends TimerTask {
 		//this.delay = delay;
 	}
 	public void run() {
-		System.out.println("Inside timer thread for: " + sequenceNumber);
+		System.out.print("Inside timer thread for: " + sequenceNumber);
+		System.out.println(". " + System.currentTimeMillis());
 		//String seqNumString = Integer.toString(sequenceNumber);
 		
 		if (TestSimpleFTPClientData.receivedACK.contains(sequenceNumber)) {

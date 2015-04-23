@@ -113,11 +113,19 @@ public class TestSimpleFTPClient {
 				
 
 				// } // End of synchronized
+				if (!TestSimpleFTPClientData.timedOutPackets.isEmpty()) {
+					System.out.println("Timeout triggered");
+					//sendOutstandingPackets(TestSimpleFTPClientData.timedOutPackets.poll());
+				}
+				
 
 			} // End of while for outstanding <= window size
-			/*if (!TestSimpleFTPClientData.timedOutPackets.isEmpty()) {
-				sendOutstandingPackets(TestSimpleFTPClientData.timedOutPackets.poll());
-			}*/
+			
+			if (!TestSimpleFTPClientData.timedOutPackets.isEmpty()) {
+				//System.out.println("Timeout triggered");
+				//sendOutstandingPackets(TestSimpleFTPClientData.timedOutPackets.poll());
+			}
+			
 			if (last == 1) {
 				break;
 			}
