@@ -66,16 +66,29 @@ public class TestSimpleFTPServer {
 				System.out.print("Extracted sequence number as: "
 						+ sequenceNumberInt + ". ");
 				if (sequenceNumberInt == sequenceNumber) {
-					String dataString = filePacket
-							.substring(64, MSS + 64);
-					System.out.println("Writing to file: " + dataString.length());
+					String numberOfBytes = filePacket.substring(MSS+64, MSS+67);
+					System.out.println("Number of bytes: " + numberOfBytes);
+					if (Integer.parseInt(numberOfBytes) < MSS) {
+						String dataString = filePacket
+								.substring(64, Integer.parseInt(numberOfBytes) + 64);
+						System.out.println("Writing to file: " + dataString.length());
+						file.write(dataString);
+						file.flush();
+						
+					} else {
+						String dataString = filePacket
+								.substring(64, MSS + 64);
+						System.out.println("Writing to file: " + dataString.length());
+						file.write(dataString);
+						file.flush();
+					}
+					
 					//System.out.println(dataString);
 					
 					//data1.writeToFile(file, dataString);
 					//outFile.append(dataString);
 					//writer.write(dataString);
-					file.write(dataString);
-					file.flush();
+					
 					
 					String sendString = data1.getSendPacket(sequenceNumber);
 					System.out.println("Sending ACK packet as: " + sendString);

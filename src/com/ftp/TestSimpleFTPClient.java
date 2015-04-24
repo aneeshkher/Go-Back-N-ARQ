@@ -45,10 +45,10 @@ public class TestSimpleFTPClient {
 
 		udpClientSocket = new DatagramSocket();
 		IPAddress = InetAddress.getByName(serverHostName);
-		//Long fileLength;
-		//fileLength = 
+		// Long fileLength;
+		// fileLength =
 		data.getFileLength(fileName);
-		//int fileLengthBytes = fileLength.intValue();
+		// int fileLengthBytes = fileLength.intValue();
 
 		TestSimpleFTPClientData.acknowledged = 0;
 		TestSimpleFTPClientData.outstanding = 0;
@@ -56,7 +56,6 @@ public class TestSimpleFTPClient {
 		int sequenceNumber = 0;
 		int packetSize = MSS + 64;
 		int last = 0;
-		
 
 		ReceiveRunnable receiveThread = new ReceiveRunnable(udpClientSocket);
 		Thread thread = new Thread(receiveThread, "receive");
@@ -65,14 +64,19 @@ public class TestSimpleFTPClient {
 		while (true) { // Outer loop. Keep on sending
 			while (TestSimpleFTPClientData.outstanding <= windowSize) {
 
-				/*String dataString = data.getDataPacket(fileStream, MSS,
-						sequenceNumber);*/
-				ReturnValues fileData = data.getDataPacket(fileStream, MSS, sequenceNumber);
+				/*
+				 * String dataString = data.getDataPacket(fileStream, MSS,
+				 * sequenceNumber);
+				 */
+				ReturnValues fileData = data.getDataPacket(fileStream, MSS,
+						sequenceNumber);
 				String dataString = fileData.dataBytes;
-				//System.out.println("Last is: " + fileData.last);
+				// System.out.println("Last is: " + fileData.last);
 				if (fileData.last == 1) {
 					System.out.println("Last packet");
 					last = 1;
+				} else if (fileData.last == 2) {
+					break;
 				}
 
 				TestSimpleFTPClientData.window.put(0, sequenceNumber);
@@ -86,10 +90,10 @@ public class TestSimpleFTPClient {
 						sendDataBytes.length, IPAddress, serverPort);
 
 				// synchronized (data)
-				System.out.println("Sending packet at: " + System.currentTimeMillis());
+				System.out.println("Sending packet at: "
+						+ System.currentTimeMillis());
 				udpClientSocket.send(sendPacket);
-				
-				
+
 				TestSimpleFTPClientData.unacknowledged.put(sequenceNumber,
 						dataString);
 				TestSimpleFTPClientData.lock.lock();
@@ -97,61 +101,79 @@ public class TestSimpleFTPClient {
 				TestSimpleFTPClientData.outstanding = TestSimpleFTPClientData.sentNotAcknowledged
 						- TestSimpleFTPClientData.acknowledged;
 				TestSimpleFTPClientData.lock.unlock();
-				
+
 				TimerPacket p1 = new TimerPacket(sequenceNumber);
 				Timer t1 = new Timer();
 				TestSimpleFTPClientData.timers.put(sequenceNumber, t1);
 				t1.schedule(p1, (long) 500);
-				if (TestSimpleFTPClientData.unacknowledged.containsKey(sequenceNumber)) {
-					//System.out.println(". Value inserted successfully!");
+				if (TestSimpleFTPClientData.unacknowledged
+						.containsKey(sequenceNumber)) {
+					// System.out.println(". Value inserted successfully!");
 				} else {
-					System.out.println(". Could not insert value into unacknowledged");
+					System.out
+							.println(". Could not insert value into unacknowledged");
 				}
 				sequenceNumber += MSS;
-				System.out.print("Outstanding: " + TestSimpleFTPClientData.outstanding);
+				System.out.print("Outstanding: "
+						+ TestSimpleFTPClientData.outstanding);
 				System.out.println(". Sending next packet with seq number: "
 						+ sequenceNumber);
 				System.out.println("");
 				if (last == 1) {
 					break;
 				}
-				//System.out.println("Timed Out Queue: " + );
-				
+				// System.out.println("Timed Out Queue: " + );
 
 				// } // End of synchronized
 				if (!TestSimpleFTPClientData.timedOutPackets.isEmpty()) {
 					System.out.println("Timeout triggered");
-					sendOutstandingPackets(TestSimpleFTPClientData.timedOutPackets.poll());
+					sendOutstandingPackets(TestSimpleFTPClientData.timedOutPackets
+							.poll());
 				}
-				
+
 				Thread.sleep(20);
 			} // End of while for outstanding <= window size
-			
+
 			if (!TestSimpleFTPClientData.timedOutPackets.isEmpty()) {
-				//System.out.println("Timeout triggered");
-				sendOutstandingPackets(TestSimpleFTPClientData.timedOutPackets.poll());
+				// System.out.println("Timeout triggered");
+				sendOutstandingPackets(TestSimpleFTPClientData.timedOutPackets
+						.poll());
 			}
-			
-			/*if (last == 1) {
-				break;
-			}*/
+
+			if (last == 1) {
+				if (TestSimpleFTPClientData.timedOutPackets.isEmpty()) {
+					break;
+				} else {
+					sendOutstandingPackets(TestSimpleFTPClientData.timedOutPackets
+							.poll());
+				}
+			}
 
 		} // End of while(true)
+		System.out.println("Sent: " + TestSimpleFTPClientData.sentNotAcknowledged);
+		System.out.println("Acked: " + TestSimpleFTPClientData.acknowledged);
+			// thread.join();
+		while (TestSimpleFTPClientData.sentNotAcknowledged != TestSimpleFTPClientData.acknowledged) {
+			if (!TestSimpleFTPClientData.timedOutPackets.isEmpty()) {
+				sendOutstandingPackets(TestSimpleFTPClientData.timedOutPackets
+						.poll());
+			}
+		}
 
 	} // End of static void main
 
 	public static synchronized void sendOutstandingPackets(int sequenceNumber)
 			throws Exception {
-		//TestSimpleFTPClientData.lock.lock();
+		// TestSimpleFTPClientData.lock.lock();
 		System.out.println("Resending all packets from: " + sequenceNumber);
-		
 
 		/*
 		 * Get the timer object for the associated sequence number Cancel the
 		 * timer for the remaining outstanding packets.
 		 */
-		//int temp = sequenceNumber + MSS;
+		// int temp = sequenceNumber + MSS;
 		int temp = sequenceNumber;
+		int temp2 = sequenceNumber;
 		System.out.print("Cancelling timers: ");
 		while (TestSimpleFTPClientData.timers.containsKey(temp)) {
 			System.out.print(temp + " ");
@@ -161,8 +183,12 @@ public class TestSimpleFTPClient {
 			temp += MSS;
 		}
 		System.out.println("");
-		
-		
+		System.out.print("Resending: ");
+		while (TestSimpleFTPClientData.unacknowledged.containsKey(temp2)) {
+			System.out.print(temp2 + " ");
+			temp2 += MSS;
+		}
+		System.out.println("");
 
 		/*
 		 * From that sequence till the end, send the packets again. Start timer
@@ -171,15 +197,14 @@ public class TestSimpleFTPClient {
 		boolean test = TestSimpleFTPClientData.unacknowledged
 				.containsKey(sequenceNumber);
 		System.out.println("Before getting unACKed packets: " + test);
-		//System.out.println(TestSimpleFTPClientData.unacknowledged.get(sequenceNumber));
-		//temp = sequenceNumber + MSS;
+		// System.out.println(TestSimpleFTPClientData.unacknowledged.get(sequenceNumber));
+		// temp = sequenceNumber + MSS;
 		temp = sequenceNumber;
-		System.out.print("Resending: ");
+
 		while (TestSimpleFTPClientData.unacknowledged.containsKey(temp)) {
-			//System.out.println("Sending: " + temp );
-			String sendData = TestSimpleFTPClientData.unacknowledged
-					.get(temp);
-			System.out.print(temp + " ");
+			// System.out.println("Sending: " + temp );
+			String sendData = TestSimpleFTPClientData.unacknowledged.get(temp);
+			// System.out.print(temp + " ");
 			byte[] sendDataBytes = sendData.getBytes();
 			DatagramPacket sendPacket = new DatagramPacket(sendDataBytes,
 					sendDataBytes.length, IPAddress, serverPort);
@@ -187,13 +212,17 @@ public class TestSimpleFTPClient {
 			TimerPacket p1 = new TimerPacket(temp);
 			Timer t1 = new Timer();
 			TestSimpleFTPClientData.timers.put(temp, t1);
-			t1.schedule(p1, (long)500);
+			try {
+				t1.schedule(p1, (long) 500);
+			} catch (IllegalStateException e1) {
+
+			}
 			temp += MSS;
 			Thread.sleep(20);
 
 		}
 		System.out.println("");
-		
+
 	}
 
 } // End of class

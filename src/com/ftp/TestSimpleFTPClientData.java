@@ -31,21 +31,44 @@ public class TestSimpleFTPClientData {
 		byte[] bytes = new byte[MSS];
 		ReturnValues r1 = new ReturnValues();
 		r1.last = 0;
+		String padding = "";
 		try {
 			int total = fileStream.read(bytes, 0, bytes.length);
 			if (total == MSS) {
 				r1.last = 0;
+			} else if (total == 0) {
+				r1.last = 2;
 			} else {
 				r1.last = 1;
+				int zeros = MSS-total;
+				for (int i = 0; i < zeros; i++) {
+					padding = "0".concat(padding);
+				}
+				System.out.println("Padded: " + padding.length() + " zeros");
 			}
 			String dataBytesString = new String(bytes);
 			String startFrame = "0101010101010101";
 			String checkSum = "1111111111111111";
-			String dataBytes = startFrame.concat(checkSum)
-					.concat(getBinaryString(sequenceNumber))
-					.concat(dataBytesString);
-			r1.dataBytes = dataBytes;
-			return r1;
+			if (r1.last == 1) {
+				dataBytesString = dataBytesString.substring(0, total);
+				String dataBytes = startFrame.concat(checkSum)
+						.concat(getBinaryString(sequenceNumber))
+						.concat(dataBytesString).concat(padding).concat(Integer.toString(total));
+				System.out.println("Read bytes: " + total + " Sending length: " + dataBytes.length());
+				System.out.println("Length of data: " + dataBytesString.length());
+				r1.dataBytes = dataBytes;
+				return r1;
+				
+			} else {
+				String dataBytes = startFrame.concat(checkSum)
+						.concat(getBinaryString(sequenceNumber))
+						.concat(dataBytesString).concat(Integer.toString(MSS));
+				System.out.println("Read bytes: " + total + " Sending length: " + dataBytes.length());
+				r1.dataBytes = dataBytes;
+				return r1;
+			}
+			
+			
 		} catch (IOException e1) {
 
 		}
