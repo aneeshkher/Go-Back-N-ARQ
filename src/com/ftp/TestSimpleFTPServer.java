@@ -22,7 +22,7 @@ public class TestSimpleFTPServer {
 		String fileName = args[1];
 		double probability = Double.parseDouble(args[2]);
 
-		int MSS = 200;
+		int MSS = 500;
 
 		TestSimpleFTPServerData data1 = new TestSimpleFTPServerData();
 		
@@ -50,17 +50,15 @@ public class TestSimpleFTPServer {
 				System.out.println("Checksum failed. Dropping packet");
 				continue;
 			} else {
-				//System.out.println("Receiving packet");
 				String filePacket = new String(receivedPacket.getData());
 				System.out.print("Received Packet: ");
-				//System.out.println(filePacket);
-				int dataLength = filePacket.length();
+
+				//int dataLength = filePacket.length();
 				int replyPort = receivedPacket.getPort();
 				InetAddress replyAddress = receivedPacket.getAddress();
 				String sequenceNumberString = (filePacket.substring(32, 64))
 						.substring(1);
-				/*System.out.println("Getting sequence number from: " + sequenceNumberString
-						+ " with length: " + sequenceNumberString.length());*/
+
 				int sequenceNumberInt = Integer.parseInt(sequenceNumberString,
 						2);
 				System.out.print("Extracted sequence number as: "
@@ -75,6 +73,7 @@ public class TestSimpleFTPServer {
 						file.write(dataString);
 						file.flush();
 						
+						file.close();
 					} else {
 						String dataString = filePacket
 								.substring(64, MSS + 64);
@@ -82,9 +81,6 @@ public class TestSimpleFTPServer {
 						file.write(dataString);
 						file.flush();
 					}
-					
-					//System.out.println(dataString);
-					
 					//data1.writeToFile(file, dataString);
 					//outFile.append(dataString);
 					//writer.write(dataString);

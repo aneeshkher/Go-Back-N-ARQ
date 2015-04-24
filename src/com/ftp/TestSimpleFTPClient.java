@@ -18,17 +18,6 @@ public class TestSimpleFTPClient {
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
-		/*
-		 * try { FileInputStream fileStream = new
-		 * FileInputStream("AppliedCompanies.txt");
-		 * 
-		 * //FileOperations.testReader("AppliedCompanies.txt"); String first =
-		 * FileOperations.testReader(fileStream); String second =
-		 * FileOperations.testReader(fileStream); System.out.println(first);
-		 * System.out.println(second); } catch (Exception e1) {
-		 * 
-		 * }
-		 */
 
 		if (args.length != 5) {
 			System.out.println("Please call the program with proper arguments");
@@ -105,7 +94,12 @@ public class TestSimpleFTPClient {
 				TimerPacket p1 = new TimerPacket(sequenceNumber);
 				Timer t1 = new Timer();
 				TestSimpleFTPClientData.timers.put(sequenceNumber, t1);
-				t1.schedule(p1, (long) 500);
+				try {
+					t1.schedule(p1, (long) 500);
+				} catch (IllegalStateException e1) {
+					
+				}
+				
 				if (TestSimpleFTPClientData.unacknowledged
 						.containsKey(sequenceNumber)) {
 					// System.out.println(". Value inserted successfully!");
@@ -194,17 +188,9 @@ public class TestSimpleFTPClient {
 		 * From that sequence till the end, send the packets again. Start timer
 		 * for each packet.
 		 */
-		boolean test = TestSimpleFTPClientData.unacknowledged
-				.containsKey(sequenceNumber);
-		System.out.println("Before getting unACKed packets: " + test);
-		// System.out.println(TestSimpleFTPClientData.unacknowledged.get(sequenceNumber));
-		// temp = sequenceNumber + MSS;
 		temp = sequenceNumber;
-
 		while (TestSimpleFTPClientData.unacknowledged.containsKey(temp)) {
-			// System.out.println("Sending: " + temp );
 			String sendData = TestSimpleFTPClientData.unacknowledged.get(temp);
-			// System.out.print(temp + " ");
 			byte[] sendDataBytes = sendData.getBytes();
 			DatagramPacket sendPacket = new DatagramPacket(sendDataBytes,
 					sendDataBytes.length, IPAddress, serverPort);
